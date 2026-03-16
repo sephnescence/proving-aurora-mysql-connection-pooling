@@ -9,3 +9,5 @@ Include a dockerfile for the two database clusters + lambda functions, the fourt
 Please create unit tests to validate the functionality of the lambda functions that call the database query, and ensure the results are logged to cloudwatch logs.
 
 Please also include Playwright tests to verify the functionality of the lambda functions and the database clusters in local development.
+
+When developing the code, please research and study https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/creating-resources-with-cloudformation.html to ensure you truly understand how to configure the cloudformation file.
