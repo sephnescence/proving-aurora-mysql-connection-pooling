@@ -8,6 +8,10 @@ Each github action will need to have access to the following github secret - AWS
 
 The Github Repository will also need to be set up to require branch protection rules for the main branch. This will need to be done manually.
 
+## Required VS Code extensions
+
+- [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) (`esbenp.prettier-vscode`) — formats on save using `.prettierrc`
+
 ---
 
 ## Q&A
