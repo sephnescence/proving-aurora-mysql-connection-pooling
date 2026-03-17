@@ -1,0 +1,9 @@
+{
+  "author": "Blake Taylor",
+  "name": "proving-aurora-mysql-connection-pooling",
+  "description": "A proof of concept for connection pooling with Aurora MySQL",
+  "private": true,
+  "license": "ISC",
+  "packageManager": "pnpm@10.20.0",
+  "version": "0.0.1"
+}
