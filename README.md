@@ -25,3 +25,9 @@ NestJS deliberately adopts Angular's file naming conventions (`*.service.ts`, `*
 
 **What does `@Injectable()` do?**
 It marks the class as a NestJS provider, meaning NestJS's dependency injection container knows about it and can instantiate it and inject it into other classes (like controllers) via their constructors. Without it, NestJS cannot resolve the class when something asks for it.
+
+**How do you add a script to `package.json` without editing the file directly?**
+Use `pnpm pkg set`:
+```bash
+pnpm pkg set scripts.format="prettier --write ."
+```
