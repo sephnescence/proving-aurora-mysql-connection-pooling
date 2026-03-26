@@ -1,14 +1,3 @@
-# Step ✅ 00020 — Create Dockerfile for pooled-app
-
-## Context
-
-Multi-stage Docker build for the pooled NestJS app. Base image is `node:22-alpine`. `wget` must be present for the Docker Compose health check.
-
-## Action
-
-Create the file `apps/pooled-app/Dockerfile` with the following exact content:
-
-```dockerfile
 FROM node:22-alpine AS builder
 
 # Install pnpm
@@ -54,8 +43,3 @@ COPY --from=builder /app/apps/pooled-app/dist ./apps/pooled-app/dist
 EXPOSE 3000
 
 CMD ["node", "apps/pooled-app/dist/main.js"]
-```
-
-## Expected result
-
-`apps/pooled-app/Dockerfile` exists.
