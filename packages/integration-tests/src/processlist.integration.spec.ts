@@ -1,12 +1,18 @@
 import { describe, it, expect } from 'vitest'
 
-// These tests currently expect 500 because no database is configured in the
-// local development environment at this stage of the build. Once Docker Compose
-// is set up (step-00033) and .env is configured (step-00032), these will be
-// updated to expect 200 with real processlist data (step-00034).
 const POOLED_URL = 'http://localhost:3000/processlist'
 const UNPOOLED_URL = 'http://localhost:3001/processlist'
 const HEADERS = { 'X-Test-Type': 'integration' }
+const REQUIRED_FIELDS = [
+  'ID',
+  'USER',
+  'HOST',
+  'DB',
+  'COMMAND',
+  'TIME',
+  'STATE',
+  'INFO',
+]
 
 async function fetchProcesslist(url: string) {
   const res = await fetch(url, { headers: HEADERS })
@@ -14,15 +20,29 @@ async function fetchProcesslist(url: string) {
 }
 
 describe('pooled-app /processlist', () => {
-  it('returns 500 when no database is configured', async () => {
-    const { status } = await fetchProcesslist(POOLED_URL)
-    expect(status).toBe(500)
+  it('returns 200 with a non-empty array of processlist rows', async () => {
+    const { status, body } = await fetchProcesslist(POOLED_URL)
+    expect(status).toBe(200)
+    expect(Array.isArray(body)).toBe(true)
+    expect((body as unknown[]).length).toBeGreaterThanOrEqual(1)
+    for (const row of body as Record<string, unknown>[]) {
+      for (const field of REQUIRED_FIELDS) {
+        expect(row).toHaveProperty(field)
+      }
+    }
   })
 })
 
 describe('unpooled-app /processlist', () => {
-  it('returns 500 when no database is configured', async () => {
-    const { status } = await fetchProcesslist(UNPOOLED_URL)
-    expect(status).toBe(500)
+  it('returns 200 with a non-empty array of processlist rows', async () => {
+    const { status, body } = await fetchProcesslist(UNPOOLED_URL)
+    expect(status).toBe(200)
+    expect(Array.isArray(body)).toBe(true)
+    expect((body as unknown[]).length).toBeGreaterThanOrEqual(1)
+    for (const row of body as Record<string, unknown>[]) {
+      for (const field of REQUIRED_FIELDS) {
+        expect(row).toHaveProperty(field)
+      }
+    }
   })
 })

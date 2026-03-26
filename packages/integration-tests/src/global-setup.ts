@@ -1,19 +1,3 @@
-# Step ✅ 00030 — Create integration-tests vitest config and global setup
-
-## Context
-
-The integration tests boot Docker Compose automatically via a Vitest `globalSetup` file. This means `pnpm --filter @pooling-poc/integration-tests test` is fully self-contained — no manual container management needed.
-
-The global setup:
-1. Runs `docker-compose up --build -d` from the repo root
-2. Polls `/health` on both apps until both return 200 (max 2 minutes)
-3. Tears down with `docker-compose down` after the suite finishes
-
-## Action
-
-Create the file `packages/integration-tests/src/global-setup.ts` with the following exact content:
-
-```typescript
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import * as path from 'path'
@@ -56,23 +40,3 @@ export async function setup(): Promise<void> {
 export async function teardown(): Promise<void> {
   await execAsync('docker-compose down', { cwd: REPO_ROOT })
 }
-```
-
-Create the file `packages/integration-tests/vitest.config.ts` with the following exact content:
-
-```typescript
-import { defineConfig } from 'vitest/config'
-
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: 'node',
-    testTimeout: 30000,
-    globalSetup: './src/global-setup.ts',
-  },
-})
-```
-
-## Expected result
-
-Both files exist. Running `pnpm --filter @pooling-poc/integration-tests test` will automatically build and start the Docker Compose stack, wait for both apps to be healthy, run the tests, and tear down.
