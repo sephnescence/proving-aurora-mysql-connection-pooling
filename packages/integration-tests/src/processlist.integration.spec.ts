@@ -1,14 +1,3 @@
-# Step ✅ 00031 — Create integration test file
-
-## Context
-
-Tests against both running NestJS apps. Uses Node 22 built-in `fetch`. At this stage no database is available, so the tests assert HTTP 500. They will be updated to assert 200 with real processlist data once Docker Compose is configured (step-00039b).
-
-## Action
-
-Create the file `packages/integration-tests/src/processlist.integration.spec.ts` with the following exact content:
-
-```typescript
 import { describe, it, expect } from 'vitest'
 
 // These tests currently expect 500 because no database is configured in the
@@ -37,8 +26,3 @@ describe('unpooled-app /processlist', () => {
     expect(status).toBe(500)
   })
 })
-```
-
-## Expected result
-
-`packages/integration-tests/src/processlist.integration.spec.ts` exists. Running `pnpm --filter @pooling-poc/integration-tests test` (with both apps running but no DB) passes with two 500 assertions.

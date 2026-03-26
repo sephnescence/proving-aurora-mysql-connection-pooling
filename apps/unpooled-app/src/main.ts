@@ -5,7 +5,7 @@ import { AppModule } from './app.module'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true })
   app.useLogger(app.get(Logger))
-  await app.listen(3000)
+  await app.listen(process.env.UNPOOLED_APP_PORT ?? 3001)
 }
 
 bootstrap()
