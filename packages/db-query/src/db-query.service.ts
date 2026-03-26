@@ -34,7 +34,11 @@ export class DbQueryService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> {
     if (this.mode === 'persistent') {
-      this.connection = await mysql.createConnection(buildConnectionConfig())
+      try {
+        this.connection = await mysql.createConnection(buildConnectionConfig())
+      } catch (err) {
+        this.logger.warn({ err }, 'db_connect_failed_on_init')
+      }
     }
   }
 
@@ -46,7 +50,10 @@ export class DbQueryService implements OnModuleInit, OnModuleDestroy {
   }
 
   async processlist(testType: string): Promise<ProcesslistRow[]> {
-    if (this.mode === 'persistent' && this.connection) {
+    if (this.mode === 'persistent') {
+      if (!this.connection) {
+        this.connection = await mysql.createConnection(buildConnectionConfig())
+      }
       const [rows] = await this.connection.execute<mysql.RowDataPacket[]>(QUERY)
       const result = rows as ProcesslistRow[]
       this.logger.info(

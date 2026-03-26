@@ -42,4 +42,4 @@ COPY --from=builder /app/apps/pooled-app/dist ./apps/pooled-app/dist
 
 EXPOSE 3000
 
-CMD ["node", "apps/pooled-app/dist/main.js"]
+CMD ["node", "apps/pooled-app/dist/src/main.js"]
