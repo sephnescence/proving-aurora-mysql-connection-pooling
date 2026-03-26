@@ -5,7 +5,7 @@ import { HealthController } from './health.controller'
 import { DbQueryModule } from '@pooling-poc/db-query'
 
 @Module({
-    imports: [TerminusModule, HttpModule, DbQueryModule],
-    controllers: [HealthController],
+  imports: [TerminusModule, HttpModule, DbQueryModule],
+  controllers: [HealthController],
 })
-export class HealthModule { }
+export class HealthModule {}
