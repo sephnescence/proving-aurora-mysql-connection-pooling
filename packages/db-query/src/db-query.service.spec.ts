@@ -1,14 +1,3 @@
-# Step ✅ 00013 — Create DbQueryService unit tests
-
-## Context
-
-Three Vitest test cases covering happy path, empty result, and error propagation. The mysql2 `createConnection` function is mocked so no real database is needed.
-
-## Action
-
-Create the file `packages/db-query/src/db-query.service.spec.ts` with the following exact content:
-
-```typescript
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Test } from '@nestjs/testing'
 import { getLoggerToken } from 'nestjs-pino'
@@ -101,8 +90,3 @@ describe('DbQueryService', () => {
     )
   })
 })
-```
-
-## Expected result
-
-`packages/db-query/src/db-query.service.spec.ts` exists. Running `pnpm --filter @pooling-poc/db-query test` will execute these three tests.
