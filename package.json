@@ -11,6 +11,7 @@
     "prettier": "^3.8.1"
   },
   "scripts": {
+    "build": "pnpm -r build",
     "format": "prettier --write ."
   }
 }
