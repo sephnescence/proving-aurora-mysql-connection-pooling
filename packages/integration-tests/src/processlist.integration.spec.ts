@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 
 // These tests currently expect 500 because no database is configured in the
 // local development environment at this stage of the build. Once Docker Compose
-// is set up (step-00038) and .env is configured (step-00039), these will be
-// updated to expect 200 with real processlist data (step-00039b).
+// is set up (step-00032) and .env is configured (step-00033), these will be
+// updated to expect 200 with real processlist data (step-00034).
 const POOLED_URL = 'http://localhost:3000/processlist'
 const UNPOOLED_URL = 'http://localhost:3001/processlist'
 const HEADERS = { 'X-Test-Type': 'integration' }
