@@ -1,10 +1,3 @@
-# Step ✅ 00023 — Create ProcesslistController in unpooled-app
-
-## Action
-
-Create the file `apps/unpooled-app/src/processlist.controller.ts` with the following exact content:
-
-```typescript
 import { Controller, Get, Headers, BadRequestException } from '@nestjs/common'
 import { DbQueryService } from '@pooling-poc/db-query'
 
@@ -20,8 +13,3 @@ export class ProcesslistController {
     return this.dbQueryService.processlist(testType)
   }
 }
-```
-
-## Expected result
-
-`apps/unpooled-app/src/processlist.controller.ts` exists.
