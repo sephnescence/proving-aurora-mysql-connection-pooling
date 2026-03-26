@@ -1,10 +1,3 @@
-# Step ✅ 00026 — Create Dockerfile for unpooled-app
-
-## Action
-
-Create the file `apps/unpooled-app/Dockerfile` with the following exact content:
-
-```dockerfile
 FROM node:22-alpine AS builder
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -12,6 +5,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY tsconfig.base.json ./
 COPY packages/db-query/package.json ./packages/db-query/
 COPY apps/unpooled-app/package.json ./apps/unpooled-app/
 
@@ -44,8 +38,3 @@ COPY --from=builder /app/apps/unpooled-app/dist ./apps/unpooled-app/dist
 EXPOSE 3000
 
 CMD ["node", "apps/unpooled-app/dist/main.js"]
-```
-
-## Expected result
-
-`apps/unpooled-app/Dockerfile` exists.
