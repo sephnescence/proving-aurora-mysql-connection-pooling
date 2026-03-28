@@ -5,5 +5,12 @@
   "scripts": {
     "artillery:sequential": "artillery run sequential.yml",
     "artillery:concurrent": "artillery run concurrent.yml"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "^3.1019.0",
+    "@types/node": "^25.5.0",
+    "artillery": "^2.0.30",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
   }
 }
