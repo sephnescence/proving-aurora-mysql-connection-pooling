@@ -1,10 +1,3 @@
-# Step ✅ 00036 — Create packages/load-tests/tsconfig.json
-
-## Action
-
-Create the file `packages/load-tests/tsconfig.json` with the following exact content:
-
-```json
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
@@ -17,8 +10,3 @@ Create the file `packages/load-tests/tsconfig.json` with the following exact con
   "include": ["*.ts"],
   "exclude": ["node_modules"]
 }
-```
-
-## Expected result
-
-`packages/load-tests/tsconfig.json` exists.
