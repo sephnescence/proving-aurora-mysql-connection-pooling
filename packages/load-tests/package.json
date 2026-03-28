@@ -1,0 +1,9 @@
+{
+  "name": "@pooling-poc/load-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "artillery:sequential": "artillery run sequential.yml",
+    "artillery:concurrent": "artillery run concurrent.yml"
+  }
+}
