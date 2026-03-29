@@ -1,14 +1,3 @@
-# Step ✅ 00044 — Create k8s/unpooled-app.yaml
-
-## Context
-
-Kubernetes Deployment and Service for the unpooled NestJS app. Connects directly to the unpooled Aurora cluster endpoint via VPC peering. Uses `DB_CONNECTION_MODE=per-request`.
-
-## Action
-
-Create the file `k8s/unpooled-app.yaml` with the following exact content:
-
-```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -74,8 +63,3 @@ spec:
   ports:
     - port: 80
       targetPort: 3000
-```
-
-## Expected result
-
-`k8s/unpooled-app.yaml` exists.
