@@ -1,14 +1,3 @@
-# Step ✅ 00047 — Create infra/main.yml (CloudFormation) — Part 1: VPCs and Networking
-
-## Context
-
-The main CloudFormation stack is large. It is split across steps 00048–00050 for readability, but all content goes into a single file `infra/main.yml`. This step creates the file with the VPC, subnet, IGW, NAT Gateway, VPC peering, and route table resources.
-
-## Action
-
-Create the file `infra/main.yml` with the following content. Subsequent steps (00049, 00050) will append to this file.
-
-```yaml
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Main stack — VPCs, EKS, Aurora x2, RDS Proxy, IAM, CloudWatch
 
@@ -216,8 +205,3 @@ Resources:
     Properties:
       SubnetId: !Ref VpcBPrivateSubnetB
       RouteTableId: !Ref PrivateRouteTableB
-```
-
-## Expected result
-
-`infra/main.yml` exists with VPC and networking resources. Step 00048 appends security groups, Aurora clusters, RDS Proxy, and EKS. Step 00049 appends IAM IRSA roles, CloudWatch, and the Outputs section.
