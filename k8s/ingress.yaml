@@ -1,14 +1,3 @@
-# Step ✅ 00045 — Create k8s/ingress.yaml
-
-## Context
-
-AWS Application Load Balancer (internet-facing) created by the AWS Load Balancer Controller. Path-based routing: `/pooled/*` → pooled-app (prefix stripped), `/unpooled/*` → unpooled-app (prefix stripped).
-
-## Action
-
-Create the file `k8s/ingress.yaml` with the following exact content:
-
-```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -37,8 +26,3 @@ spec:
                 name: unpooled-app
                 port:
                   number: 80
-```
-
-## Expected result
-
-`k8s/ingress.yaml` exists.
