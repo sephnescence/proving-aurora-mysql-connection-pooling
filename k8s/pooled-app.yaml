@@ -1,14 +1,3 @@
-# Step ✅ 00043 — Create k8s/pooled-app.yaml
-
-## Context
-
-Kubernetes Deployment and Service for the pooled NestJS app. Connects to the RDS Proxy endpoint. Uses `DB_CONNECTION_MODE=persistent`. The `${ECR_REPO_POOLED}` and `${IMAGE_TAG}` placeholders are substituted by `envsubst` during deployment.
-
-## Action
-
-Create the file `k8s/pooled-app.yaml` with the following exact content:
-
-```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -74,8 +63,3 @@ spec:
   ports:
     - port: 80
       targetPort: 3000
-```
-
-## Expected result
-
-`k8s/pooled-app.yaml` exists.
