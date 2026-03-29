@@ -1,0 +1,16 @@
+config:
+  target: '{{ $env.TARGET_URL }}'
+  phases:
+    - duration: 1
+      arrivalCount: 3
+  defaults:
+    headers:
+      X-Test-Type: 'sequential'
+
+scenarios:
+  - name: 'Sequential processlist'
+    flow:
+      - loop:
+          - get:
+              url: '/processlist'
+        count: 5
