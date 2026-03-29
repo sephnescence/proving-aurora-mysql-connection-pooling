@@ -1,14 +1,3 @@
-# Step ✅ 00039 — Create CloudWatch polling script (poll.ts)
-
-## Context
-
-A TypeScript CLI script run via `tsx`. Accepts `--testType`, `--startTime`, `--pooledLogGroup`, and `--unpooledLogGroup` arguments. Polls CloudWatch Logs Insights every 30 seconds for 5 minutes, printing a table of results and average `rowCount` per log group per iteration.
-
-## Action
-
-Create the file `packages/load-tests/poll.ts` with the following exact content:
-
-```typescript
 import {
   CloudWatchLogsClient,
   StartQueryCommand,
@@ -116,8 +105,3 @@ poll().catch((err) => {
   console.error(err)
   process.exit(1)
 })
-```
-
-## Expected result
-
-`packages/load-tests/poll.ts` exists.
