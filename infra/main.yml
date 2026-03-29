@@ -205,3 +205,229 @@ Resources:
     Properties:
       SubnetId: !Ref VpcBPrivateSubnetB
       RouteTableId: !Ref PrivateRouteTableB
+
+# ── Security Groups ──────────────────────────────────────────────────────────
+
+EksNodeSG:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    GroupDescription: EKS worker node SG
+    VpcId: !Ref VpcA
+    SecurityGroupIngress: []
+    Tags: [{ Key: Name, Value: aurora-pooling-poc-eks-node-sg }]
+
+PooledAuroraSG:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    GroupDescription: Pooled Aurora SG
+    VpcId: !Ref VpcA
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        SourceSecurityGroupId: !Ref EksNodeSG
+    Tags: [{ Key: Name, Value: aurora-pooling-poc-pooled-aurora-sg }]
+
+RdsProxySG:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    GroupDescription: RDS Proxy SG
+    VpcId: !Ref VpcA
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        SourceSecurityGroupId: !Ref EksNodeSG
+    Tags: [{ Key: Name, Value: aurora-pooling-poc-rds-proxy-sg }]
+
+UnpooledAuroraSG:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    GroupDescription: Unpooled Aurora SG
+    VpcId: !Ref VpcB
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        CidrIp: 10.0.0.0/16
+    Tags: [{ Key: Name, Value: aurora-pooling-poc-unpooled-aurora-sg }]
+
+# ── Pooled Aurora Serverless v2 ──────────────────────────────────────────────
+
+PooledAuroraSubnetGroup:
+  Type: AWS::RDS::DBSubnetGroup
+  Properties:
+    DBSubnetGroupDescription: Pooled Aurora subnet group
+    SubnetIds:
+      - !Ref VpcAPrivateSubnetA
+      - !Ref VpcAPrivateSubnetB
+
+PooledAuroraCluster:
+  Type: AWS::RDS::DBCluster
+  Properties:
+    Engine: aurora-mysql
+    EngineVersion: '8.0.mysql_aurora.3.04.0'
+    DatabaseName: pooling_poc
+    MasterUsername: admin
+    ManageMasterUserPassword: true
+    DBSubnetGroupName: !Ref PooledAuroraSubnetGroup
+    VpcSecurityGroupIds:
+      - !Ref PooledAuroraSG
+    ServerlessV2ScalingConfiguration:
+      MinCapacity: 0.5
+      MaxCapacity: 1
+    StorageEncrypted: true
+
+PooledAuroraInstance:
+  Type: AWS::RDS::DBInstance
+  Properties:
+    Engine: aurora-mysql
+    DBInstanceClass: db.serverless
+    DBClusterIdentifier: !Ref PooledAuroraCluster
+
+# ── Unpooled Aurora Serverless v2 ───────────────────────────────────────────
+
+UnpooledAuroraSubnetGroup:
+  Type: AWS::RDS::DBSubnetGroup
+  Properties:
+    DBSubnetGroupDescription: Unpooled Aurora subnet group
+    SubnetIds:
+      - !Ref VpcBPrivateSubnetA
+      - !Ref VpcBPrivateSubnetB
+
+UnpooledAuroraCluster:
+  Type: AWS::RDS::DBCluster
+  Properties:
+    Engine: aurora-mysql
+    EngineVersion: '8.0.mysql_aurora.3.04.0'
+    DatabaseName: pooling_poc
+    MasterUsername: admin
+    ManageMasterUserPassword: true
+    DBSubnetGroupName: !Ref UnpooledAuroraSubnetGroup
+    VpcSecurityGroupIds:
+      - !Ref UnpooledAuroraSG
+    ServerlessV2ScalingConfiguration:
+      MinCapacity: 0.5
+      MaxCapacity: 1
+    StorageEncrypted: true
+
+UnpooledAuroraInstance:
+  Type: AWS::RDS::DBInstance
+  Properties:
+    Engine: aurora-mysql
+    DBInstanceClass: db.serverless
+    DBClusterIdentifier: !Ref UnpooledAuroraCluster
+
+# ── RDS Proxy ────────────────────────────────────────────────────────────────
+
+RdsProxyRole:
+  Type: AWS::IAM::Role
+  Properties:
+    RoleName: aurora-pooling-poc-rds-proxy-role
+    AssumeRolePolicyDocument:
+      Version: '2012-10-17'
+      Statement:
+        - Effect: Allow
+          Principal:
+            Service: rds.amazonaws.com
+          Action: sts:AssumeRole
+    Policies:
+      - PolicyName: SecretsManagerRead
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+                - secretsmanager:DescribeSecret
+              Resource: !GetAtt PooledAuroraCluster.MasterUserSecret.SecretArn
+
+RdsProxy:
+  Type: AWS::RDS::DBProxy
+  Properties:
+    DBProxyName: aurora-pooling-poc-proxy
+    EngineFamily: MYSQL
+    RoleArn: !GetAtt RdsProxyRole.Arn
+    Auth:
+      - AuthScheme: SECRETS
+        SecretArn: !GetAtt PooledAuroraCluster.MasterUserSecret.SecretArn
+        IAMAuth: DISABLED
+    VpcSubnetIds:
+      - !Ref VpcAPrivateSubnetA
+      - !Ref VpcAPrivateSubnetB
+    VpcSecurityGroupIds:
+      - !Ref RdsProxySG
+
+RdsProxyTargetGroup:
+  Type: AWS::RDS::DBProxyTargetGroup
+  Properties:
+    DBProxyName: !Ref RdsProxy
+    TargetGroupName: default
+    DBClusterIdentifiers:
+      - !Ref PooledAuroraCluster
+    ConnectionPoolConfigurationInfo:
+      MaxConnectionsPercent: 100
+      MaxIdleConnectionsPercent: 50
+
+# ── EKS Cluster ──────────────────────────────────────────────────────────────
+
+EksRole:
+  Type: AWS::IAM::Role
+  Properties:
+    RoleName: aurora-pooling-poc-eks-role
+    AssumeRolePolicyDocument:
+      Version: '2012-10-17'
+      Statement:
+        - Effect: Allow
+          Principal:
+            Service: eks.amazonaws.com
+          Action: sts:AssumeRole
+    ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+
+EksNodeRole:
+  Type: AWS::IAM::Role
+  Properties:
+    RoleName: aurora-pooling-poc-eks-node-role
+    AssumeRolePolicyDocument:
+      Version: '2012-10-17'
+      Statement:
+        - Effect: Allow
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: sts:AssumeRole
+    ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+      - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+      - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
+EksCluster:
+  Type: AWS::EKS::Cluster
+  Properties:
+    Name: aurora-pooling-poc-eks
+    Version: '1.32'
+    RoleArn: !GetAtt EksRole.Arn
+    ResourcesVpcConfig:
+      SubnetIds:
+        - !Ref VpcAPrivateSubnetA
+        - !Ref VpcAPrivateSubnetB
+      SecurityGroupIds:
+        - !Ref EksNodeSG
+      EndpointPublicAccess: true
+      EndpointPrivateAccess: true
+
+EksNodeGroup:
+  Type: AWS::EKS::Nodegroup
+  Properties:
+    ClusterName: !Ref EksCluster
+    NodegroupName: aurora-pooling-poc-nodes
+    NodeRole: !GetAtt EksNodeRole.Arn
+    Subnets:
+      - !Ref VpcAPrivateSubnetA
+      - !Ref VpcAPrivateSubnetB
+    InstanceTypes:
+      - t3.small
+    ScalingConfig:
+      MinSize: 1
+      MaxSize: 1
+      DesiredSize: 1
