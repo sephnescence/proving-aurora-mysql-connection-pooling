@@ -1,0 +1,14 @@
+config:
+  target: '{{ $env.TARGET_URL }}'
+  phases:
+    - duration: 1
+      arrivalCount: 15
+  defaults:
+    headers:
+      X-Test-Type: 'concurrent'
+
+scenarios:
+  - name: 'Concurrent processlist'
+    flow:
+      - get:
+          url: '/processlist'
