@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for outdated dependencies
+        continue-on-error: true
+        run: |
+          if ! pnpm outdated -r; then
+            echo "::warning::Outdated dependencies found. Run 'pnpm outdated -r' locally to review."
+          fi
+
+      - name: Run unit tests
+        id: unit-tests
+        run: pnpm --filter @pooling-poc/db-query test
+
+      - name: Build Docker images
+        run: |
+          docker build -f apps/pooled-app/Dockerfile -t pooled-app:ci .
+          docker build -f apps/unpooled-app/Dockerfile -t unpooled-app:ci .
+
+      - name: Start Docker Compose
+        run: docker compose up -d
+        env:
+          MYSQL_ROOT_PASSWORD: testroot
+          DB_PASSWORD: testpass
+
+      - name: Wait for apps to be healthy
+        run: |
+          for app in "http://localhost:3000/health" "http://localhost:3001/health"; do
+            echo "Waiting for $app"
+            for i in $(seq 1 30); do
+              if curl -sf "$app" > /dev/null 2>&1; then
+                echo "$app is healthy"
+                break
+              fi
+              if [ "$i" -eq 30 ]; then
+                echo "$app did not become healthy in time"
+                docker compose logs
+                exit 1
+              fi
+              sleep 5
+            done
+          done
+
+      - name: Run integration tests
+        id: integration-tests
+        run: pnpm --filter @pooling-poc/integration-tests test
+
+      - name: Stop Docker Compose
+        if: always()
+        run: docker compose down
+        env:
+          MYSQL_ROOT_PASSWORD: testroot
+          DB_PASSWORD: testpass
+
+      - name: Fail if any tests failed
+        if: steps.unit-tests.outcome == 'failure' || steps.integration-tests.outcome == 'failure'
+        run: exit 1
