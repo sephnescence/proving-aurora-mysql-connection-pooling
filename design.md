@@ -44,7 +44,7 @@ pnpm workspaces monorepo.
 
 | Stack name                     | Deploy method               | Contents                                                        |
 | ------------------------------ | --------------------------- | --------------------------------------------------------------- |
-| `aurora-pooling-poc-bootstrap` | Manual (AWS CLI once)       | GitHub OIDC provider, deploy IAM role, ECR repos                |
+| `aurora-pooling-poc-bootstrap` | Manual (AWS CLI once)       | Deploy IAM role, ECR repos (OIDC provider is pre-existing account infrastructure, not managed here) |
 | `aurora-pooling-poc`           | `deploy.yml` GitHub Actions | Everything else (VPCs, EKS, Aurora, RDS Proxy, IAM, CloudWatch) |
 
 ### VPC Topology
