@@ -22,6 +22,14 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
 
+      - name: Install actionlint
+        run: |
+          bash <(curl -s https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          sudo mv actionlint /usr/local/bin/
+
+      - name: Lint GitHub Actions workflows
+        run: actionlint
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
