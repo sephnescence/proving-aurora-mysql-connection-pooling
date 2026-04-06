@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Bootstrap stack — OIDC provider, deploy role, ECR repos
+Description: Bootstrap stack — deploy role, ECR repos
 
 Parameters:
   GitHubOrg:
@@ -11,15 +11,6 @@ Parameters:
     Default: proving-aurora-mysql-connection-pooling
 
 Resources:
-  GitHubOIDCProvider:
-    Type: AWS::IAM::OIDCProvider
-    Properties:
-      Url: https://token.actions.githubusercontent.com
-      ClientIdList:
-        - sts.amazonaws.com
-      ThumbprintList:
-        - 6938fd4d98bab03faadb97b34396831e3780aea1
-
   DeployRole:
     Type: AWS::IAM::Role
     Properties:
@@ -29,7 +20,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Federated: !GetAtt GitHubOIDCProvider.Arn
+              Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com'
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
               StringEquals:
